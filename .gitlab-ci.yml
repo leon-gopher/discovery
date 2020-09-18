@@ -1,0 +1,27 @@
+services:
+  - consul:1.6.2
+  
+# 配置GOPATH
+before_script:
+  - mkdir -p $(dirname "$GOPATH/src/discovery/$CI_PROJECT_PATH")
+  - ln -svf $CI_PROJECT_DIR $(dirname "$GOPATH/src/discovery/$CI_PROJECT_PATH")
+  - cd $GOPATH/src/discovery/$CI_PROJECT_PATH
+  - export GO111MODULE=on
+  - export GOPROXY=https://goproxy.io
+  - go mod tidy -v
+
+stages:
+    - test
+
+build:
+  stage: test
+
+  tags:
+    - k8s-qa
+
+  script:    
+    - go test -v -timeout 5m ./...
+    - go test -v -timeout 5m -race ./...
+    - go test -v -timeout 5m -cover ./...
+  
+  
